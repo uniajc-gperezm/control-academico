@@ -1,0 +1,23 @@
+# ================================================
+# ARCHIVO DE CONFIGURACIÓN - PLANTILLA
+# ================================================
+#
+# INSTRUCCIONES:
+# 1. Copia este archivo y renómbralo a "config.properties"
+# 2. Configura tus valores reales
+# 3. NO subas config.properties a Git
+#
+# ================================================
+
+# ================================================
+# CONFIGURACIÓN DE LA BASE DE DATOS
+# ================================================
+
+# URL de conexión (formato: jdbc:mysql://HOST:PORT/DATABASE)
+database.url=jdbc:mysql://localhost:3306/control-academico
+
+# Usuario de MySQL
+database.user=root
+
+# Contraseña de MySQL (CAMBIAR POR LA TUYA)
+database.password=CAMBIAR_POR_TU_PASSWORD
