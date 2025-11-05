@@ -4,8 +4,8 @@
 #
 # INSTRUCCIONES:
 # 1. Copia este archivo y renómbralo a "config.properties"
-# 2. Configura tus valores reales
-# 3. NO subas config.properties a Git
+# 2. Configura tus valores reales (especialmente la contraseña)
+# 3. NO subas config.properties a Git (ya está en .gitignore)
 #
 # ================================================
 
@@ -14,10 +14,36 @@
 # ================================================
 
 # URL de conexión (formato: jdbc:mysql://HOST:PORT/DATABASE)
-database.url=jdbc:mysql://localhost:3306/control-academico
+# Nota: El nombre de la base de datos debe coincidir con el schema SQL
+database.url=jdbc:mysql://localhost:3306/academico-v2
 
 # Usuario de MySQL
 database.user=root
 
 # Contraseña de MySQL (CAMBIAR POR LA TUYA)
 database.password=CAMBIAR_POR_TU_PASSWORD
+
+# ================================================
+# CONFIGURACIÓN DEL POOL DE CONEXIONES (HikariCP)
+# ================================================
+
+# Número máximo de conexiones en el pool
+# Ajustar según la carga esperada (default: 10)
+db.pool.maximumPoolSize=10
+
+# Número mínimo de conexiones inactivas mantenidas
+# Mantiene conexiones listas para uso rápido (default: 2)
+db.pool.minimumIdle=2
+
+# Timeout para obtener una conexión del pool (milisegundos)
+# 30000 ms = 30 segundos (default: 30000)
+db.pool.connectionTimeout=30000
+
+# Tiempo máximo que una conexión puede estar inactiva (milisegundos)
+# 600000 ms = 10 minutos (default: 600000)
+db.pool.idleTimeout=600000
+
+# Tiempo máximo de vida de una conexión (milisegundos)
+# 1800000 ms = 30 minutos (default: 1800000)
+# Debe ser menor que wait_timeout de MySQL (default: 28800 segundos)
+db.pool.maxLifetime=1800000

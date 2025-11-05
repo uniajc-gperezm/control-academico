@@ -1,0 +1,270 @@
+erDiagram
+  %% ===========================================================
+  %% GEOGRAFÍA
+  %% ===========================================================
+  PAISES {
+    INT pais_id PK
+    VARCHAR nombre
+  }
+  DEPARTAMENTOS {
+    INT dpto_id PK
+    INT pais_id FK
+    VARCHAR nombre
+  }
+  CIUDADES {
+    INT ciudad_id PK
+    INT dpto_id FK
+    VARCHAR nombre
+  }
+  PAISES ||--o{ DEPARTAMENTOS : tiene
+  DEPARTAMENTOS ||--o{ CIUDADES : tiene
+
+  %% ===========================================================
+  %% IDENTIDAD & ACCESO
+  %% ===========================================================
+  PERSONAS {
+    UUID persona_id PK
+    TIPO_DOC_ENUM documento_tipo
+    VARCHAR documento_numero
+    VARCHAR nombres
+    VARCHAR apellidos
+    GENERO_ENUM genero
+    CITEXT email
+    VARCHAR telefono
+    INT ciudad_id FK
+    VARCHAR direccion
+    DATE fecha_nacimiento
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  USUARIOS {
+    UUID usuario_id PK
+    UUID persona_id FK
+    CITEXT username
+    TEXT password_hash
+    BOOLEAN activo
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  ROLES {
+    INT rol_id PK
+    ROL_USUARIO_ENUM nombre
+    TEXT descripcion
+  }
+
+  USUARIO_ROLES {
+    UUID usuario_id FK
+    INT rol_id FK
+  }
+
+  ESTUDIANTES {
+    UUID estudiante_id PK
+    UUID persona_id FK
+    VARCHAR codigo
+    DATE fecha_ingreso
+    BOOLEAN activo
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  DOCENTES {
+    UUID docente_id PK
+    UUID persona_id FK
+    VARCHAR titulo
+    VARCHAR categoria
+    BOOLEAN activo
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  PERSONAS ||--o| USUARIOS : "puede tener"
+  PERSONAS ||--o| ESTUDIANTES : "puede ser"
+  PERSONAS ||--o| DOCENTES : "puede ser"
+  USUARIOS ||--o{ USUARIO_ROLES : asignado
+  ROLES ||--o{ USUARIO_ROLES : contiene
+  CIUDADES ||--o{ PERSONAS : residencia
+
+  %% ===========================================================
+  %% ESTRUCTURA ACADÉMICA
+  %% ===========================================================
+  PROGRAMAS {
+    INT programa_id PK
+    VARCHAR nombre
+    VARCHAR nivel
+  }
+
+  ASIGNATURAS {
+    INT asignatura_id PK
+    INT programa_id FK
+    VARCHAR codigo
+    VARCHAR nombre
+    INT creditos
+    INT horas_semana
+    BOOLEAN activa
+  }
+
+  ASIGNATURA_REQUISITOS {
+    INT asignatura_id FK
+    INT requisito_id FK
+  }
+
+  PERIODOS_ACADEMICOS {
+    INT periodo_id PK
+    VARCHAR nombre
+    DATE fecha_inicio
+    DATE fecha_fin
+    VARCHAR estado
+  }
+
+  CURSOS {
+    INT curso_id PK
+    INT asignatura_id FK
+    INT periodo_id FK
+    VARCHAR seccion
+    INT cupo_max
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  CURSO_DOCENTES {
+    INT curso_id FK
+    UUID docente_id FK
+    ROL_DOCENTE_ENUM rol
+  }
+
+  AULAS {
+    INT aula_id PK
+    VARCHAR codigo
+    INT capacidad
+  }
+
+  CLASES {
+    INT clase_id PK
+    INT curso_id FK
+    INT aula_id FK
+    INT numero
+    DATE fecha
+    VARCHAR tema
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  PROGRAMAS ||--o{ ASIGNATURAS : "incluye"
+  ASIGNATURAS ||--o{ ASIGNATURA_REQUISITOS : "tiene"
+  ASIGNATURAS ||--o{ ASIGNATURA_REQUISITOS : "requisito"
+  ASIGNATURAS ||--o{ CURSOS : "se oferta en"
+  PERIODOS_ACADEMICOS ||--o{ CURSOS : "contiene"
+  CURSOS ||--o{ CURSO_DOCENTES : "asigna"
+  DOCENTES ||--o{ CURSO_DOCENTES : "participa"
+  AULAS ||--o{ CLASES : "alberga"
+  CURSOS ||--o{ CLASES : "programa"
+
+  %% ===========================================================
+  %% MATRÍCULAS & ASISTENCIAS
+  %% ===========================================================
+  MATRICULAS {
+    INT matricula_id PK
+    UUID estudiante_id FK
+    INT curso_id FK
+    ESTADO_MATRICULA_ENUM estado
+    DATE fecha_inscripcion
+    DATE fecha_retiro
+    TEXT observaciones
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  ASISTENCIAS {
+    INT asistencia_id PK
+    INT matricula_id FK
+    INT clase_id FK
+    ESTADO_ASISTENCIA_ENUM estado
+    TEXT novedades
+    UUID registrado_por FK
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  ESTUDIANTES ||--o{ MATRICULAS : "se inscribe"
+  CURSOS ||--o{ MATRICULAS : "recibe"
+  MATRICULAS ||--o{ ASISTENCIAS : "registra"
+  CLASES ||--o{ ASISTENCIAS : "tiene"
+
+  %% ===========================================================
+  %% EVALUACIÓN (CORTES y COMPONENTES)
+  %% ===========================================================
+  CORTES_CURSO {
+    INT corte_id PK
+    INT curso_id FK
+    VARCHAR codigo
+    NUMERIC porcentaje
+  }
+
+  COMPONENTES_EVALUACION {
+    INT componente_id PK
+    INT corte_id FK
+    VARCHAR nombre
+    NUMERIC porcentaje
+    TEXT descripcion
+    DATE fecha_publicacion
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  CALIFICACIONES {
+    INT calificacion_id PK
+    INT matricula_id FK
+    INT componente_id FK
+    NUMERIC nota 
+    TEXT comentarios
+    BOOLEAN publicado
+    UUID registrado_por FK
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  CURSOS ||--o{ CORTES_CURSO : "define"
+  CORTES_CURSO ||--o{ COMPONENTES_EVALUACION : "desglosa"
+  MATRICULAS ||--o{ CALIFICACIONES : "obtiene"
+  COMPONENTES_EVALUACION ||--o{ CALIFICACIONES : "evalúa"
+
+  %% ===========================================================
+  %% PROYECTO INTEGRADOR (C3_INTEGRADOR)
+  %% ===========================================================
+  PROYECTOS_INTEGRADORES {
+    INT proyecto_id PK
+    INT periodo_id FK
+    VARCHAR nombre
+    TEXT descripcion
+    UUID creado_por FK
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+  }
+
+  PROYECTO_ASIGNATURAS {
+    INT proyecto_id FK
+    INT asignatura_id FK
+  }
+
+  ENTREGAS_INTEGRADOR {
+    INT entrega_id PK
+    INT proyecto_id FK
+    INT numero 
+    VARCHAR nombre
+    TEXT descripcion
+    DATE fecha_limite
+  }
+
+  COMPONENTE_ENTREGA_INTEGRADOR {
+    INT componente_id "PK FK"
+    INT entrega_id FK
+  }
+
+  PERIODOS_ACADEMICOS ||--o{ PROYECTOS_INTEGRADORES : "incluye"
+  PROYECTOS_INTEGRADORES ||--o{ PROYECTO_ASIGNATURAS : "vincula"
+  ASIGNATURAS ||--o{ PROYECTO_ASIGNATURAS : "participa"
+  PROYECTOS_INTEGRADORES ||--o{ ENTREGAS_INTEGRADOR : "posee"
+  COMPONENTES_EVALUACION ||--o| COMPONENTE_ENTREGA_INTEGRADOR : "mapea"
+  ENTREGAS_INTEGRADOR ||--o{ COMPONENTE_ENTREGA_INTEGRADOR : "recibe"
